@@ -55,4 +55,16 @@ function M.execute_current_file()
     M.send_command_to_current_term(path, true, "exec " .. filename)
 end
 
+-- returns true if file open succeeds, so it exists
+-- aperio ergo sum
+function M.file_exists(name)
+  local f=io.open(name,"r")
+  if f~=nil then
+    io.close(f)
+    return true
+  else
+    return false
+  end
+end
+
 return M
