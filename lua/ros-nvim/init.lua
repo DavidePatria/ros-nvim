@@ -32,7 +32,9 @@ ROS_CONFIG = {
     param_picker_mappings = function(map)
         map("n", "<c-e>", vim_utils.open_terminal_with_format_cmd_entry("rosparam set %s"))
         map("i", "<c-e>", vim_utils.open_terminal_with_format_cmd_entry("rosparam set %s"))
-    end
+    end,
+    -- line of clangd argument. initialized to empty
+    cmd = "",
 }
 
 function M.setup(config)
