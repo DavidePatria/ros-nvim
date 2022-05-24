@@ -45,7 +45,8 @@ function M.setup(config)
     end
 end
 
--- returns true if open succeeds, so it exists
+
+-- returns true if file open succeeds, so it exists
 function M.file_exists(name)
   local f=io.open(name,"r")
   if f~=nil then
