@@ -66,14 +66,11 @@ end
 --   end
 -- end
 
--- local ros_nvim = vim.api.nvim_create_augroup("ros-nvim", {clear = true})
--- vim.api.nvim_create_autocmd({"BufEnter"}, {pattern="*.cpp,*.cc", callback=ros_package(), group = ros_nvim})
-
 -- notification is file is not found
 local no_file = "compile_commands.json does not exist in build dir"
 local not_package = "not in a ROS package"
 
-function M.get_clangd_arg()
+function M.set_clangd_arg()
   local name = package.get_current_package_name()
 
   if name ~= nil then
@@ -81,14 +78,26 @@ function M.get_clangd_arg()
     local db_file = "/home/davide/catkin_ws/build/" .. name .. "/compile_commands.json"
     -- check if file exists but then pass path
     if M.file_exists(db_file) then
-      return "--compile-commands-dir=".. db_path
+      ROS_CONFIG.cmd = "--compile-commands-dir=".. db_path
+      -- return true
     else
       vim.notify(no_file, "warn")
+      -- return false
     end
   else
     vim.notify(not_package, "warn")
+    -- return false
   end
 end
+
+function M.get_clangd_cmd()
+  return ROS_CONFIG.cmd
+end
+
+
+local ros_nvim = vim.api.nvim_create_augroup("ros-nvim", {clear = true})
+vim.api.nvim_create_autocmd({"BufAdd"}, {pattern={"*.cpp","*.cc"}, callback=M.set_clangd_arg, group = ros_nvim})
+
 
 
 return M
