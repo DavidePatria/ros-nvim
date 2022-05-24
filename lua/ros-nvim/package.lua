@@ -2,11 +2,14 @@ local M = {}
 
 function M.get_current_package_name(path)
   path = path or vim.fn.expand("%:p")
-    -- local pkg_name = vim.fn.system('python3 -c "try: import rospkg; print(rospkg.get_package_name( \''..path ..'\')) \nexcept: print('no_ros_on_system')"'),
   local pkg_name = vim.fn.system('python3 -c "import rospkg;print(rospkg.get_package_name(\'' .. path .. '\'))"')
 
-  print("pkg_name" .. pkg_name)
-  print("inside function" .. pkg_name)
+  -- local pkg_name = vim.fn.system[[python3 -c "try: import rospkg; print(rospkg.get_package_name( \''..path ..'\'))
+  -- except: print('no_ros_on_system')"]],
+
+  -- print("pkg_name" .. pkg_name)
+  -- print("inside function" .. pkg_name)
+
   -- clean up output
   pkg_name, _ = string.gsub(pkg_name, "\r", "")
   pkg_name, _ = string.gsub(pkg_name, "\n", "")

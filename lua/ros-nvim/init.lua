@@ -63,7 +63,8 @@ function M.set_clangd_arg()
   local ws = string.gsub(ROS_CONFIG.catkin_ws_path, "~", os.getenv("HOME"))
 
   -- debug
-  -- vim.notify("package name is " .. name, "info")
+  vim.notify("package name is " .. name, "info")
+  print("package name is " .. name)
 
   -- name is not nil also when rospkg python is not found
   if name ~= nil and name ~= "no_ros_on_system" then
@@ -75,7 +76,7 @@ function M.set_clangd_arg()
     if vim_utils.file_exists(db_file) then
 
       -- debug
-      -- vim.notify(db_file .. " exists", "info")
+      vim.notify(db_file .. " exists", "info")
 
       ROS_CONFIG.cmd = "--compile-commands-dir=".. db_path
       -- return true
@@ -91,13 +92,10 @@ function M.set_clangd_arg()
   end
 end
 
+local ros_nvim = vim.api.nvim_create_augroup("ros-nvim", {clear = true})
+vim.api.nvim_create_autocmd({"BufEnter"}, {pattern={"*.cpp","*.cc"}, callback=M.set_clangd_arg, group = ros_nvim})
 function M.get_clangd_cmd()
   return ROS_CONFIG.cmd
 end
-
-
-local ros_nvim = vim.api.nvim_create_augroup("ros-nvim", {clear = true})
-vim.api.nvim_create_autocmd({"BufAdd"}, {pattern={"*.cpp","*.cc"}, callback=M.set_clangd_arg, group = ros_nvim})
-
 
 return M
