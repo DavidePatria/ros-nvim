@@ -33,8 +33,9 @@ ROS_CONFIG = {
         map("n", "<c-e>", vim_utils.open_terminal_with_format_cmd_entry("rosparam set %s"))
         map("i", "<c-e>", vim_utils.open_terminal_with_format_cmd_entry("rosparam set %s"))
     end,
-    -- line of clangd argument. initialized to empty
-    cmd = "",
+    -- line of clangd argument. initialized to nil so clangd doesn't complain if it is not
+    -- set to a string (when not in ros package)
+    cmd = nil,
 }
 
 function M.setup(config)
@@ -46,17 +47,6 @@ function M.setup(config)
 end
 
 
--- returns true if file open succeeds, so it exists
-function M.file_exists(name)
-  local f=io.open(name,"r")
-  if f~=nil then
-    io.close(f)
-    return true
-  else
-    return false
-  end
-end
-
 -- local in_ros = false
 --
 -- local function ros_package()
@@ -67,27 +57,36 @@ end
 --   end
 -- end
 
--- notification is file is not found
-local no_file = "compile_commands.json does not exist in build dir"
-local not_package = "not in a ROS package"
-
 function M.set_clangd_arg()
   local name = package.get_current_package_name()
+  -- plugin config using "~/carpeta" but lua requires extended form for io.open
+  local ws = string.gsub(ROS_CONFIG.catkin_ws_path, "~", os.getenv("HOME"))
+
+  -- debug
+  -- vim.notify("package name is " .. name, "info")
 
   -- name is not nil also when rospkg python is not found
-  if name ~= nil or name ~= 'no_ros_on_system' then
-    local db_path = "/home/davide/catkin_ws/build/" .. name
-    local db_file = "/home/davide/catkin_ws/build/" .. name .. "/compile_commands.json"
+  if name ~= nil and name ~= "no_ros_on_system" then
+    local db_path = ws .. '/' .. "build/" .. name .. '/'
+    -- print("db_path type is " .. type(db_path))
+    local db_file = db_path .. "compile_commands.json"
+    -- print("db_file type is " .. type(db_file))
     -- check if file exists but then pass path
-    if M.file_exists(db_file) then
+    if vim_utils.file_exists(db_file) then
+
+      -- debug
+      -- vim.notify(db_file .. " exists", "info")
+
       ROS_CONFIG.cmd = "--compile-commands-dir=".. db_path
       -- return true
     else
-      vim.notify(no_file, "warn")
+      -- local no_file = "compile_commands.json does not exist in "
+      vim.notify("compile database does not exist in " .. db_path, "warn")
       -- return false
     end
   else
-    vim.notify(not_package, "warn")
+    -- local not_package = "cpp file but not in a ROS package"
+    vim.notify( "cpp file but not in a ROS package", "info")
     -- return false
   end
 end
@@ -99,7 +98,6 @@ end
 
 local ros_nvim = vim.api.nvim_create_augroup("ros-nvim", {clear = true})
 vim.api.nvim_create_autocmd({"BufAdd"}, {pattern={"*.cpp","*.cc"}, callback=M.set_clangd_arg, group = ros_nvim})
-
 
 
 return M
